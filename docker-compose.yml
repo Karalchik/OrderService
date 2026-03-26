@@ -1,0 +1,28 @@
+services:
+  orders-api:
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+    container_name: orders_api_container
+    ports:
+      - "5000:8080"
+    depends_on:
+      - mongodb
+    environment:
+      - ConnectionStrings__MongoDb=mongodb://mongodb:27017
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+  mongodb:
+    image: mongo:latest
+    container_name: order_db_container
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
