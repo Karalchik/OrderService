@@ -1,50 +1,40 @@
-﻿using OrderService.Domain.Interfaces;
+﻿using OrderService.Application.DTOs;
+using OrderService.Application.Mapping;
+using OrderService.Domain.Interfaces;
 using OrderService.Domain.Models;
-using OrderService.Application.DTOs;
 
-namespace OrderService.Application.Services
+namespace OrderService.Application.Services;
+
+public class OrderCommandService : IOrderCommandService
 {
-    public class OrderCommandService
+    private readonly IOrderRepository _repository;
+    private readonly TimeProvider _timeProvider;
+
+    public OrderCommandService(IOrderRepository repository, TimeProvider timeProvider)
     {
-        private readonly IOrderRepository _repository;
+        _repository = repository;
+        _timeProvider = timeProvider;
+    }
 
-        public OrderCommandService(IOrderRepository repository)
-        {
-            _repository = repository;
-        }
+    public async Task<OrderDto> CreateOrderAsync(OrderDto request)
+    {
+        var order = OrderMapper.ToDomain(request);
+        order.Status = OrderStatus.Created;
+        order.CreatedAt = _timeProvider.GetUtcNow().UtcDateTime;
+        var created = await _repository.CreateAsync(order);
+        return OrderMapper.ToDto(created);
+    }
 
-        public async Task<Order> CreateOrderAsync(CreateOrderRequest request)
-        {
-            var order = new Order
-            {
-                UserId = request.UserId,
-                CreatedAt = DateTime.UtcNow,
-                Status = Order.StatusCreated,
-                Items = request.Items.Select(i => new OrderItem
-                {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    Price = i.Price
-                }).ToList()
-            };
+    public async Task<OrderDto?> CancelOrderAsync(string id)
+    {
+        var order = await _repository.GetByIdAsync(id);
+        if (order == null) return null;
 
-            await _repository.CreateAsync(order);
-            return order;
-        }
+        if (!order.CanBeCanceled())
+            throw new InvalidOperationException($"Order with status '{order.Status}' cannot be cancelled.");
 
-        public async Task<Order?> CancelOrderAsync(string id)
-        {
-            var order = await _repository.GetByIdAsync(id);
-            if (order == null) return null;
-
-            if (!order.CanBeCanceled())
-            {
-                throw new InvalidOperationException("Order cannot be canceled in its current state.");
-            }
-
-            order.Status = Order.StatusCanceled;
-            await _repository.UpdateAsync(order);
-            return order;
-        }
+        order.Status = OrderStatus.Canceled;
+        var updated = await _repository.UpdateAsync(order);
+        return OrderMapper.ToDto(updated);
     }
 }

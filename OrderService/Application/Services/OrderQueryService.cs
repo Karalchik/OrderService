@@ -1,26 +1,28 @@
-﻿using OrderService.Domain.Interfaces;
-using OrderService.Domain.Models;
+﻿using OrderService.Application.DTOs;
+using OrderService.Application.Mapping;
+using OrderService.Domain.Interfaces;
 
-namespace OrderService.Application.Services
+namespace OrderService.Application.Services;
+
+public class OrderQueryService : IOrderQueryService
 {
-    public class OrderQueryService
+    private readonly IOrderRepository _repository;
+
+    public OrderQueryService(IOrderRepository repository)
     {
-        private readonly IOrderRepository _repository;
+        _repository = repository;
+    }
 
-        public OrderQueryService(IOrderRepository repository)
-        {
-            _repository = repository;
-        }
+    public async Task<OrderDto?> GetOrderByIdAsync(string id)
+    {
+        var order = await _repository.GetByIdAsync(id);
+        return order is null ? null : OrderMapper.ToDto(order);
+    }
 
-        public async Task<Order?> GetOrderByIdAsync(string id)
-        {
-            return await _repository.GetByIdAsync(id);
-        }
-
-        public async Task<IEnumerable<Order>> GetOrdersAsync(string? userId, string? status, int limit, int offset)
-        {
-            //можно написать сюда кеш
-            return await _repository.ListAsync(userId, status, limit, offset);
-        }
+    public async Task<IReadOnlyList<OrderDto>> GetOrdersAsync(
+        string? userId, string? status, int limit, int offset)
+    {
+        var orders = await _repository.ListAsync(userId, status, limit, offset);
+        return orders.Select(OrderMapper.ToDto).ToList();
     }
 }

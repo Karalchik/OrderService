@@ -1,23 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace OrderService.Domain.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum OrderStatus
+    {
+        Created,
+        Delivered,
+        Canceled
+    }
     public class Order
     {
-        public string Id { get; set; }
-        public string UserId { get; set; }
+        public required string Id { get; set; }
+        public required string UserName { get; set; }
         public List<OrderItem> Items { get; set; } = new();
-        public string Status { get; set; }
+        public required OrderStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
-
-        public const string StatusCreated = "CREATED";
-        public const string StatusDelivered = "DELIVERED";
-        public const string StatusCanceled = "CANCELED";
 
         public bool CanBeCanceled()
         {
-            return Status != StatusDelivered && Status != StatusCanceled;
+            return Status != OrderStatus.Delivered && Status != OrderStatus.Canceled;
         }
     }
 }

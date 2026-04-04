@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrderService.Application.DTOs;
 using OrderService.Application.Services;
-using OrderService.Domain.Models;
 
 namespace OrderService.API.Controllers
 {
@@ -9,44 +8,40 @@ namespace OrderService.API.Controllers
     [Route("api/v1/[controller]")]
     public class OrdersController : ControllerBase
     {
-        private readonly OrderCommandService _commandService;
-        private readonly OrderQueryService _queryService;
+        private readonly IOrderCommandService _commandService;
+        private readonly IOrderQueryService _queryService;
 
-        public OrdersController(OrderCommandService commandService, OrderQueryService queryService)
+        public OrdersController(IOrderCommandService commandService, IOrderQueryService queryService)
         {
             _commandService = commandService;
             _queryService = queryService;
         }
 
-        //write
-
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateOrderRequest request)
+        public async Task<ActionResult<OrderDto>> Create([FromBody] OrderDto request)
         {
             var order = await _commandService.CreateOrderAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
         }
 
         [HttpPost("{id}/cancel")]
-        public async Task<IActionResult> Cancel(string id)
+        public async Task<ActionResult<OrderDto>> Cancel(string id)
         {
             var order = await _commandService.CancelOrderAsync(id);
             if (order == null) return NotFound();
-            return Ok(order);
+            return order;
         }
 
-        //read
-
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<ActionResult<OrderDto>> GetById(string id)
         {
             var order = await _queryService.GetOrderByIdAsync(id);
             if (order == null) return NotFound();
-            return Ok(order);
+            return order;
         }
 
         [HttpGet]
-        public async Task<IActionResult> List(
+        public async Task<ActionResult<IReadOnlyList<OrderDto>>> List(
             [FromQuery] string? userId,
             [FromQuery] string? status,
             [FromQuery] int limit = 10,

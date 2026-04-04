@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Time.Testing;
+using Moq;
+using OrderService.Application.DTOs;
 using OrderService.Application.Services;
 using OrderService.Domain.Interfaces;
 using OrderService.Domain.Models;
@@ -9,12 +11,14 @@ namespace OrderService.Tests
     public class OrderCommandServiceTests
     {
         private readonly Mock<IOrderRepository> _repositoryMock;
+        private readonly FakeTimeProvider _fakeTime;
         private readonly OrderCommandService _service;
 
         public OrderCommandServiceTests()
         {
             _repositoryMock = new Mock<IOrderRepository>();
-            _service = new OrderCommandService(_repositoryMock.Object);
+            _fakeTime = new FakeTimeProvider(new DateTimeOffset(2024, 6, 15, 12, 0, 0, TimeSpan.Zero));
+            _service = new OrderCommandService(_repositoryMock.Object, _fakeTime);
         }
 
         [Fact]
@@ -24,11 +28,14 @@ namespace OrderService.Tests
             var deliveredOrder = new Order
             {
                 Id = orderId,
-                Status = Order.StatusDelivered
+                UserName = "user1",
+                Status = OrderStatus.Delivered
             };
 
             _repositoryMock.Setup(r => r.GetByIdAsync(orderId))
                            .ReturnsAsync(deliveredOrder);
+
+            _fakeTime.Advance(TimeSpan.FromHours(1));
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.CancelOrderAsync(orderId));
@@ -37,11 +44,14 @@ namespace OrderService.Tests
         [Fact]
         public async Task CreateOrder_ShouldCallRepositorySave()
         {
-            var request = new OrderService.Application.DTOs.CreateOrderRequest
+            var request = new OrderDto
             {
-                UserId = "user1",
+                UserName = "user1",
                 Items = new()
             };
+
+            _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<Order>()))
+                           .ReturnsAsync((Order o) => o);
 
             await _service.CreateOrderAsync(request);
 
