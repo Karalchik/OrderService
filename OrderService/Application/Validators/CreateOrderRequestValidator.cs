@@ -3,6 +3,7 @@ using OrderService.Application.DTOs;
 
 namespace OrderService.Application.Validators
 {
+    /// <summary>Validation rules for order creation requests.</summary>
     public class CreateOrderRequestValidator : AbstractValidator<OrderDto>
     {
         public CreateOrderRequestValidator()

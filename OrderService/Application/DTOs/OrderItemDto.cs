@@ -1,5 +1,6 @@
 ﻿namespace OrderService.Application.DTOs
 {
+    /// <summary>DTO for a single order line item.</summary>
     public class OrderItemDto
     {
         public required string ProductName { get; set; }

@@ -2,6 +2,7 @@
 
 namespace OrderService.Application.DTOs;
 
+/// <summary>DTO for order API requests and responses.</summary>
 public record OrderDto
 {
     public string? Id { get; init; }

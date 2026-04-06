@@ -3,6 +3,7 @@ using System.Text.Json;
 
 namespace OrderService.Infrastructure.Middleware
 {
+    /// <summary>Catches unhandled exceptions and returns a structured JSON error response.</summary>
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;

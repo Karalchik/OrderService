@@ -4,6 +4,7 @@ using OrderService.Domain.Models;
 
 namespace OrderService.Infrastructure
 {
+    /// <inheritdoc cref="IOrderRepository"/>
     public class OrderRepository : IOrderRepository
     {
         private readonly IMongoCollection<Order> _orders;
@@ -31,7 +32,7 @@ namespace OrderService.Infrastructure
             return order;
         }
 
-        //HRL
+        /// <inheritdoc/>
         public async Task<IEnumerable<Order>> ListAsync(string? userName, string? status, int limit, int offset)
         {
             var filterBuilder = Builders<Order>.Filter;

@@ -5,6 +5,7 @@ using OrderService.Domain.Models;
 
 namespace OrderService.Application.Services;
 
+/// <inheritdoc cref="IOrderCommandService"/>
 public class OrderCommandService : IOrderCommandService
 {
     private readonly IOrderRepository _repository;
@@ -16,6 +17,7 @@ public class OrderCommandService : IOrderCommandService
         _timeProvider = timeProvider;
     }
 
+    /// <inheritdoc/>
     public async Task<OrderDto> CreateOrderAsync(OrderDto request)
     {
         var order = OrderMapper.ToDomain(request);
@@ -25,6 +27,7 @@ public class OrderCommandService : IOrderCommandService
         return OrderMapper.ToDto(created);
     }
 
+    /// <inheritdoc/>
     public async Task<OrderDto?> CancelOrderAsync(string id)
     {
         var order = await _repository.GetByIdAsync(id);

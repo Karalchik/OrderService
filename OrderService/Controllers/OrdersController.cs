@@ -4,6 +4,7 @@ using OrderService.Application.Services;
 
 namespace OrderService.API.Controllers
 {
+    /// <summary>REST API for managing orders.</summary>
     [ApiController]
     [Route("api/v1/[controller]")]
     public class OrdersController : ControllerBase
@@ -17,6 +18,7 @@ namespace OrderService.API.Controllers
             _queryService = queryService;
         }
 
+        /// <summary>Creates a new order.</summary>
         [HttpPost]
         public async Task<ActionResult<OrderDto>> Create([FromBody] OrderDto request)
         {
@@ -24,6 +26,7 @@ namespace OrderService.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
         }
 
+        /// <summary>Cancels an existing order.</summary>
         [HttpPost("{id}/cancel")]
         public async Task<ActionResult<OrderDto>> Cancel(string id)
         {
@@ -32,6 +35,7 @@ namespace OrderService.API.Controllers
             return order;
         }
 
+        /// <summary>Gets an order by id.</summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetById(string id)
         {
@@ -40,6 +44,7 @@ namespace OrderService.API.Controllers
             return order;
         }
 
+        /// <summary>Lists orders with optional filtering and pagination.</summary>
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<OrderDto>>> List(
             [FromQuery] string? userId,

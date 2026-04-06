@@ -1,5 +1,6 @@
 ﻿namespace OrderService.Domain.Models
 {
+    /// <summary>Single line item within an <see cref="Order"/>.</summary>
     public class OrderItem
     {
         public string ProductName { get; set; }
