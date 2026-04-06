@@ -1,5 +1,4 @@
 services:
-  # Наше API
   orders-api:
     build:
       context: .
@@ -11,8 +10,8 @@ services:
       - mongodb
     environment:
       - ConnectionStrings__MongoDb=mongodb://mongodb:27017
+      - ConnectionStrings__Redis=redis:6379,abortConnect=false
 
-  # База данных
   mongodb:
     image: mongo:latest
     container_name: order_db_container
@@ -20,6 +19,12 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+
+  redis:
+    image: redis:alpine
+    container_name: order_cache_container
+    ports:
+      - "6379:6379"
 
 volumes:
   mongo-data:
