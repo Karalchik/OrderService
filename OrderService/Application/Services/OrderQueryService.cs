@@ -12,33 +12,44 @@ public class OrderQueryService : IOrderQueryService
     private readonly IOrderRepository _repository;
     private readonly IDistributedCache _cache;
     private readonly ILogger<OrderQueryService> _logger;
+    private readonly OrderMapper _mapper;
 
-    public OrderQueryService(IOrderRepository repository, IDistributedCache cache, ILogger<OrderQueryService> logger)
+    /// <summary>
+    /// Initializes a new instance of <see cref="OrderQueryService"/>.
+    /// </summary>
+    /// <param name="repository">Order persistence repository.</param>
+    /// <param name="cache">Redis distributed cache for order lookups.</param>
+    /// <param name="logger">Logger for cache hit/miss diagnostics.</param>
+    /// <param name="mapper">Mapperly-based mapper for Order/DTO conversions.</param>
+    public OrderQueryService(IOrderRepository repository, IDistributedCache cache, ILogger<OrderQueryService> logger, OrderMapper mapper)
     {
         _repository = repository;
         _cache = cache;
         _logger = logger;
+        _mapper = mapper;
     }
 
     /// <inheritdoc/>
-    /// <remarks>Uses Redis cache with 5-minute expiration (cache-aside pattern).</remarks>
-    public async Task<OrderDto?> GetOrderByIdAsync(string id)
+    /// <remarks>
+    /// Implements a cache-aside pattern using Redis with a 5-minute absolute expiration.
+    /// On cache miss the order is fetched from MongoDB and stored in cache for subsequent reads.
+    /// </remarks>
+    public async Task<OrderDto> GetOrderByIdAsync(string id)
     {
         string cacheKey = $"order_{id}";
 
         var cachedOrder = await _cache.GetStringAsync(cacheKey);
-        if (!string.IsNullOrEmpty(cachedOrder))
+        if (!string.IsNullOrWhiteSpace(cachedOrder))
         {
             _logger.LogInformation("Order {OrderId} found in cache", id);
-            return JsonSerializer.Deserialize<OrderDto>(cachedOrder);
+            return JsonSerializer.Deserialize<OrderDto>(cachedOrder)!;
         }
 
         _logger.LogInformation("Order {OrderId} not found in cache. Fetching from MongoDB", id);
-        var order = await _repository.GetByIdAsync(id);
+        var order = await _repository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Order with id '{id}' was not found.");
 
-        if (order is null) return null;
-
-        var dto = OrderMapper.ToDto(order);
+        var dto = _mapper.ToDto(order);
 
         var cacheOptions = new DistributedCacheEntryOptions
         {
@@ -53,6 +64,6 @@ public class OrderQueryService : IOrderQueryService
     public async Task<IReadOnlyList<OrderDto>> GetOrdersAsync(string? userName, string? status, int limit, int offset)
     {
         var orders = await _repository.ListAsync(userName, status, limit, offset);
-        return orders.Select(OrderMapper.ToDto).ToList();
+        return orders.Select(o => _mapper.ToDto(o)).ToList();
     }
 }

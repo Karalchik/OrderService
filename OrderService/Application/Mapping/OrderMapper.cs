@@ -1,52 +1,38 @@
 ﻿using OrderService.Application.DTOs;
 using OrderService.Domain.Models;
-
+using Riok.Mapperly.Abstractions;
 
 namespace OrderService.Application.Mapping;
 
-/// <summary>Maps between <see cref="Order"/> domain entities and <see cref="OrderDto"/>.</summary>
-public static class OrderMapper
+/// <summary>
+/// Mapperly-based mapper between <see cref="Order"/> domain entities and <see cref="OrderDto"/> DTOs.
+/// Compile-time source generator — zero runtime reflection overhead.
+/// </summary>
+[Mapper]
+public partial class OrderMapper
 {
-    public static OrderDto ToDto(Order order)
-    {
-        return new OrderDto
-        {
-            Id = order.Id,
-            UserName = order.UserName,
-            Items = order.Items?.Select(ToDto).ToList() ?? [],
-            Status = order.Status,
-            CreatedAt = order.CreatedAt
-        };
-    }
+    /// <summary>Maps an <see cref="Order"/> domain entity to an <see cref="OrderDto"/>.</summary>
+    public partial OrderDto ToDto(Order order);
 
-    public static OrderItemDto ToDto(OrderItem item)
-    {
-        return new OrderItemDto
-        {
-            ProductName = item.ProductName,
-            Quantity = item.Quantity,
-            Price = item.Price
-        };
-    }
+    /// <summary>Maps an <see cref="OrderItem"/> to an <see cref="OrderItemDto"/>.</summary>
+    public partial OrderItemDto ItemToDto(OrderItem item);
 
-    public static Order ToDomain(OrderDto dto)
+    /// <summary>Maps an <see cref="OrderItemDto"/> to an <see cref="OrderItem"/> domain entity.</summary>
+    public partial OrderItem ItemToDomain(OrderItemDto dto);
+
+    /// <summary>
+    /// Maps an <see cref="OrderDto"/> to an <see cref="Order"/> domain entity.
+    /// Applies defaults: empty Id and <see cref="OrderStatus.Created"/> when not provided.
+    /// </summary>
+    public Order ToDomain(OrderDto dto)
     {
         return new Order
         {
             Id = dto.Id ?? string.Empty,
             UserName = dto.UserName,
             Status = dto.Status ?? OrderStatus.Created,
-            Items = dto.Items?.Select(ToDomain).ToList() ?? []
-        };
-    }
-
-    public static OrderItem ToDomain(OrderItemDto dto)
-    {
-        return new OrderItem
-        {
-            ProductName = dto.ProductName,
-            Quantity = dto.Quantity,
-            Price = dto.Price
+            Items = dto.Items.Select(ItemToDomain).ToList(),
+            Version = dto.Version ?? 1
         };
     }
 }

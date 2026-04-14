@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using MongoDB.Driver;
+using OrderService.Application.Mapping;
 using OrderService.Application.Services;
 using OrderService.Application.Validators;
 using OrderService.Domain.Interfaces;
@@ -18,7 +19,7 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 MongoDbConfig.RegisterMappings();
-
+//options
 var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb") ?? "mongodb://localhost:27017";
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 
@@ -29,7 +30,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = redisConnectionString;
     options.InstanceName = "OrderService_";
 });
-
+// Application services
+builder.Services.AddSingleton<OrderMapper>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderCommandService, OrderCommandService>();
 builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();

@@ -3,12 +3,15 @@ using OrderService.Application.DTOs;
 
 namespace OrderService.Application.Validators
 {
-    /// <summary>Validation rules for order creation requests.</summary>
+    /// <summary>
+    /// FluentValidation rules for <see cref="OrderDto"/> when creating a new order.
+    /// Ensures user name, items, quantities, and prices are valid.
+    /// </summary>
     public class CreateOrderRequestValidator : AbstractValidator<OrderDto>
     {
+        /// <summary>Initializes the validation rules.</summary>
         public CreateOrderRequestValidator()
         {
-            
             RuleFor(x => x.UserName)
                 .NotEmpty().WithMessage("User Name is required.");
 
