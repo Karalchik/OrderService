@@ -1,16 +1,16 @@
-﻿using OrderService.Application.DTOs;
+using OrderService.Application.DTOs;
 
 namespace OrderService.Application.Services;
 
 /// <summary>Defines write (command) operations for the Order aggregate.</summary>
 public interface IOrderCommandService
 {
-    /// <summary>Creates a new order with status <see cref="OrderStatus.Created"/>.</summary>
+    /// <summary>Creates a new order with status Created.</summary>
     /// <param name="request">DTO containing user name and line items.</param>
     /// <returns>The created order DTO with generated Id, status, and timestamp.</returns>
-    Task<OrderDto> CreateOrderAsync(OrderDto request);
+    Task<OrderDto> CreateOrderAsync(CreateOrderRequest request);
 
-    /// <summary>Cancels an existing order by transitioning its status to <see cref="OrderStatus.Canceled"/>.</summary>
+    /// <summary>Cancels an existing order by transitioning its status to Canceled.</summary>
     /// <param name="id">The order identifier.</param>
     /// <returns>The canceled order DTO.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the order is not found.</exception>

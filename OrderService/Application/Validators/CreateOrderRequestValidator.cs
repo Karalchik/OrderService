@@ -7,7 +7,7 @@ namespace OrderService.Application.Validators
     /// FluentValidation rules for <see cref="OrderDto"/> when creating a new order.
     /// Ensures user name, items, quantities, and prices are valid.
     /// </summary>
-    public class CreateOrderRequestValidator : AbstractValidator<OrderDto>
+    public class CreateOrderRequestValidator : AbstractValidator<CreateOrderRequest>
     {
         /// <summary>Initializes the validation rules.</summary>
         public CreateOrderRequestValidator()

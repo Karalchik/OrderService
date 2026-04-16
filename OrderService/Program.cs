@@ -11,23 +11,23 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog: reads "Serilog" section from appsettings.json
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
-
-builder.Host.UseSerilog();
+builder.Host.UseSerilog((context, configuration) =>
+configuration.ReadFrom.Configuration(context.Configuration));
 
 MongoDbConfig.RegisterMappings();
-//options
-var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb") ?? "mongodb://localhost:27017";
-var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 
-builder.Services.AddSingleton<IMongoClient>(new MongoClient(mongoConnectionString));
+var connectionStringOptions = builder.Configuration
+    .GetSection("ConnectionStrings")
+    .Get<ConnectionStringOptions>() ?? new ConnectionStringOptions();
+
+builder.Services.Configure<ConnectionStringOptions>(
+    builder.Configuration.GetSection("ConnectionStrings"));
+
+builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionStringOptions.MongoDb));
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = redisConnectionString;
+    options.Configuration = connectionStringOptions.Redis;
     options.InstanceName = "OrderService_";
 });
 // Application services
@@ -42,7 +42,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderRequestValidator
 
 builder.Services.AddHealthChecks()
     .AddMongoDb(name: "mongodb")
-    .AddRedis(redisConnectionString, name: "redis");
+    .AddRedis(connectionStringOptions.Redis, name: "redis");
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

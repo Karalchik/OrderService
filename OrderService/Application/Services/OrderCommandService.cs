@@ -1,4 +1,5 @@
-﻿using OrderService.Application.DTOs;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using OrderService.Application.DTOs;
 using OrderService.Application.Mapping;
 using OrderService.Domain.Interfaces;
 using OrderService.Domain.Models;
@@ -9,6 +10,7 @@ namespace OrderService.Application.Services;
 public class OrderCommandService : IOrderCommandService
 {
     private readonly IOrderRepository _repository;
+    private readonly IDistributedCache _cache;
     private readonly TimeProvider _timeProvider;
     private readonly OrderMapper _mapper;
 
@@ -16,17 +18,19 @@ public class OrderCommandService : IOrderCommandService
     /// Initializes a new instance of <see cref="OrderCommandService"/>.
     /// </summary>
     /// <param name="repository">Order persistence repository.</param>
+    /// <param name="cache">Distributed cache for invalidation on writes.</param>
     /// <param name="timeProvider">Provider used to generate UTC timestamps for new orders.</param>
     /// <param name="mapper">Mapperly-based mapper for Order/DTO conversions.</param>
-    public OrderCommandService(IOrderRepository repository, TimeProvider timeProvider, OrderMapper mapper)
+    public OrderCommandService(IOrderRepository repository, IDistributedCache cache, TimeProvider timeProvider, OrderMapper mapper)
     {
         _repository = repository;
+        _cache = cache;
         _timeProvider = timeProvider;
         _mapper = mapper;
     }
 
     /// <inheritdoc/>
-    public async Task<OrderDto> CreateOrderAsync(OrderDto request)
+    public async Task<OrderDto> CreateOrderAsync(CreateOrderRequest request)
     {
         var order = _mapper.ToDomain(request);
         order.Status = OrderStatus.Created;
@@ -46,6 +50,9 @@ public class OrderCommandService : IOrderCommandService
 
         order.Status = OrderStatus.Canceled;
         var updated = await _repository.UpdateAsync(order);
+
+        await _cache.RemoveAsync($"order_{id}");
+
         return _mapper.ToDto(updated);
     }
 }

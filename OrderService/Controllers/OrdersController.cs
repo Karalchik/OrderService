@@ -14,7 +14,7 @@ namespace OrderService.API.Controllers
     {
         private readonly IOrderCommandService _commandService;
         private readonly IOrderQueryService _queryService;
-        // Di by method not in controller || mediator
+
         /// <summary>
         /// Initializes a new instance of <see cref="OrdersController"/>.
         /// </summary>
@@ -32,7 +32,7 @@ namespace OrderService.API.Controllers
         /// <response code="201">Order successfully created.</response>
         /// <response code="400">Validation failed (empty user name, invalid items, etc.).</response>
         [HttpPost]
-        public async Task<ActionResult<OrderDto>> Create([FromBody] OrderDto request)
+        public async Task<ActionResult<OrderDto>> Create([FromBody] CreateOrderRequest request)
         {
             var order = await _commandService.CreateOrderAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);

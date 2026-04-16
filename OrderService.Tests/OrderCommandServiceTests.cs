@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Time.Testing;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 using OrderService.Application.DTOs;
 using OrderService.Application.Mapping;
@@ -13,14 +14,16 @@ namespace OrderService.Tests
     public class OrderCommandServiceTests
     {
         private readonly Mock<IOrderRepository> _repositoryMock;
+        private readonly Mock<IDistributedCache> _cacheMock;
         private readonly FakeTimeProvider _fakeTime;
         private readonly OrderCommandService _service;
 
         public OrderCommandServiceTests()
         {
             _repositoryMock = new Mock<IOrderRepository>();
+            _cacheMock = new Mock<IDistributedCache>();
             _fakeTime = new FakeTimeProvider(new DateTimeOffset(2024, 6, 15, 12, 0, 0, TimeSpan.Zero));
-            _service = new OrderCommandService(_repositoryMock.Object, _fakeTime, new OrderMapper());
+            _service = new OrderCommandService(_repositoryMock.Object, _cacheMock.Object, _fakeTime, new OrderMapper());
         }
 
         /// <summary>Verifies that canceling a delivered order throws <see cref="InvalidOperationException"/>.</summary>
@@ -59,7 +62,7 @@ namespace OrderService.Tests
         [Fact]
         public async Task CreateOrder_ShouldCallRepositorySave()
         {
-            var request = new OrderDto
+            var request = new CreateOrderRequest
             {
                 UserName = "user1",
                 Items = new()

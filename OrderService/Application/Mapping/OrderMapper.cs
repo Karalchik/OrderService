@@ -35,4 +35,18 @@ public partial class OrderMapper
             Version = dto.Version ?? 1
         };
     }
+
+    /// <summary>
+    /// Maps a <see cref="CreateOrderRequest"/> to an <see cref="Order"/> domain entity.
+    /// </summary>
+    public Order ToDomain(CreateOrderRequest request)
+    {
+        return new Order
+        {
+            Id = string.Empty,
+            UserName = request.UserName,
+            Status = OrderStatus.Created,
+            Items = request.Items.Select(ItemToDomain).ToList()
+        };
+    }
 }
