@@ -1,0 +1,50 @@
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CurrencyPipe } from '@angular/common'; 
+import { OrderService } from '../../services/order';
+import { Order } from '../../models/order.model';
+
+@Component({
+  selector: 'app-order-list',
+  standalone: true,
+  imports: [CurrencyPipe], 
+  templateUrl: './order-list.html',
+  styleUrls: ['./order-list.scss']
+})
+export class OrderList implements OnInit {
+  private readonly orderService = inject(OrderService);
+
+  // Using signals for state management
+  orders = signal<Order[]>([]);
+  errorMessage = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.fetchOrders();
+  }
+
+  fetchOrders(): void {
+    this.orderService.getOrders().subscribe({
+      next: (data) => {
+        this.orders.set(data);
+        console.log('[OrderUI] Orders loaded successfully via Signals.');
+      },
+      error: (err) => {
+        this.errorMessage.set('Failed to load orders. Please check your connection.');
+        console.error('[OrderUI] FETCH_ERROR:', err);
+      }
+    });
+  }
+
+  onCancel(id: string | undefined): void {
+    if (!id) return;
+
+    this.orderService.cancelOrder(id).subscribe({
+      next: (updatedOrder) => {
+        this.orders.update(prev => 
+          prev.map(o => o.id === id ? updatedOrder : o)
+        );
+        console.log(`[OrderUI] Order ${id} cancelled.`);
+      },
+      error: (err) => alert('Action failed: ' + (err.error?.message || 'Unknown error'))
+    });
+  }
+}
