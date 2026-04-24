@@ -38,6 +38,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      
+  order-ui:
+    container_name: order_ui_container
+    build:
+      context: ./OrderUI
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - orders-api
 
 volumes:
   mongo-data:
