@@ -1,0 +1,35 @@
+<div class="container">
+  <h2>Create New Order</h2>
+  
+  <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="order-form">
+    <div class="form-group">
+      <label>User ID</label>
+      <input formControlName="userId" placeholder="Enter user identification">
+      @if (orderForm.get('userId')?.touched && orderForm.get('userId')?.invalid) {
+        <small class="error">User ID is required (min 3 chars).</small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Product ID</label>
+      <input formControlName="productId" placeholder="Product UUID or Name">
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" formControlName="quantity">
+      </div>
+
+      <div class="form-group">
+        <label>Price per unit</label>
+        <input type="number" formControlName="price">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" routerLink="/orders" class="btn-secondary">Back</button>
+      <button type="submit" [disabled]="orderForm.invalid" class="btn-primary">Place Order</button>
+    </div>
+  </form>
+</div>

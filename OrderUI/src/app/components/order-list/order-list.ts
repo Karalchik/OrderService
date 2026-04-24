@@ -1,12 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common'; 
 import { OrderService } from '../../services/order';
+import { Router, RouterLink } from '@angular/router';
 import { Order } from '../../models/order.model';
 
 @Component({
   selector: 'app-order-list',
   standalone: true,
-  imports: [CurrencyPipe], 
+  imports: [CurrencyPipe, RouterLink],
   templateUrl: './order-list.html',
   styleUrls: ['./order-list.scss']
 })
