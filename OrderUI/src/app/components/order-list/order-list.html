@@ -1,16 +1,15 @@
 <div class="container">
-  <header>
-    <h2>Order Management Console</h2>
-  </header>
-
-  @if (errorMessage()) {
-    <div class="error-banner">
-      {{ errorMessage() }}
-    </div>
-  }
   <div class="header-actions">
+    <h2>Order Management Console</h2>
     <button routerLink="/orders/create" class="btn-primary">Create New Order</button>
   </div>
+
+  @if (isLoading()) {
+    <div class="loader">
+      <div class="spinner"></div>
+      <p>Fetching data from backend...</p>
+    </div>
+  } @else {
   <table class="order-table">
     <thead>
       <tr>
@@ -47,4 +46,5 @@
       }
     </tbody>
   </table>
+}
 </div>

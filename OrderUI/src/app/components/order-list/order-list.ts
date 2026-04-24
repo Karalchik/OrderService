@@ -14,22 +14,25 @@ import { Order } from '../../models/order.model';
 export class OrderList implements OnInit {
   private readonly orderService = inject(OrderService);
 
-  // Using signals for state management
   orders = signal<Order[]>([]);
   errorMessage = signal<string | null>(null);
+  isLoading = signal<boolean>(false);
 
   ngOnInit(): void {
     this.fetchOrders();
   }
 
   fetchOrders(): void {
+    this.isLoading.set(true);
     this.orderService.getOrders().subscribe({
       next: (data) => {
         this.orders.set(data);
+        this.isLoading.set(false);
         console.log('[OrderUI] Orders loaded successfully via Signals.');
       },
       error: (err) => {
         this.errorMessage.set('Failed to load orders. Please check your connection.');
+        this.isLoading.set(false);
         console.error('[OrderUI] FETCH_ERROR:', err);
       }
     });
