@@ -16,8 +16,8 @@ export class OrderCreate {
   private readonly router = inject(Router);
 
   orderForm = this.fb.group({
-    userId: ['', [Validators.required, Validators.minLength(3)]],
-    productId: ['', [Validators.required]],
+    userName: ['', [Validators.required, Validators.minLength(3)]],
+    productName: ['', [Validators.required]],
     quantity: [1, [Validators.required, Validators.min(1)]],
     price: [0, [Validators.required, Validators.min(0.01)]]
   });
@@ -27,9 +27,9 @@ export class OrderCreate {
       const formValue = this.orderForm.value;
       
       const newOrder = {
-        userId: formValue.userId,
+        userName: formValue.userName,
         items: [{
-          productId: formValue.productId,
+          productName: formValue.productName,
           quantity: formValue.quantity,
           price: formValue.price
         }]

@@ -3,16 +3,16 @@
   
   <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="order-form">
     <div class="form-group">
-      <label>User ID</label>
-      <input formControlName="userId" placeholder="Enter user identification">
-      @if (orderForm.get('userId')?.touched && orderForm.get('userId')?.invalid) {
-        <small class="error">User ID is required (min 3 chars).</small>
+      <label>User Name</label>
+      <input formControlName="userName" placeholder="Enter user name">
+      @if (orderForm.get('userName')?.touched && orderForm.get('userName')?.invalid) {
+        <small class="error">User Name is required (min 3 chars).</small>
       }
     </div>
 
     <div class="form-group">
-      <label>Product ID</label>
-      <input formControlName="productId" placeholder="Product UUID or Name">
+      <label>Product Name</label>
+      <input formControlName="productName" placeholder="Product UUID or Name">
     </div>
 
     <div class="row">
