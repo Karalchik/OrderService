@@ -34,7 +34,7 @@ namespace OrderService.Tests
             var deliveredOrder = new Order
             {
                 Id = orderId,
-                UserName = "",
+                UserName = "user1",
                 Status = OrderStatus.Delivered
             };
 
