@@ -1,0 +1,50 @@
+<div class="container">
+  <div class="header-actions">
+    <h2>Order Management Console</h2>
+    <button routerLink="/orders/create" class="btn-primary">Create New Order</button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loader">
+      <div class="spinner"></div>
+      <p>Fetching data from backend...</p>
+    </div>
+  } @else {
+  <table class="order-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (order of orders(); track order.id) {
+        <tr>
+          <td class="mono">{{ order.id }}</td>
+          <td><a [routerLink]="['/orders', order.id]">{{ order.id }}</a></td>
+          <td>{{ order.totalPrice | currency:'USD' }}</td>
+          <td>
+            <span [class]="'badge status-' + order.status.toLowerCase()">
+              {{ order.status }}
+            </span>
+          </td>
+          <td>
+            @if (order.status !== 'Cancelled' && order.status !== 'Delivered') {
+              <button (click)="onCancel(order.id)" class="btn-cancel">
+                Cancel
+              </button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="empty-row">No orders available.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+</div>
